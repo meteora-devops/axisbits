@@ -1,0 +1,32 @@
+services:
+  frontend:
+    build:
+      context: frontend
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    volumes:
+      - ./frontend:/app
+      - /project/node_modules
+
+  backend:
+    build:
+      context: backend
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./backend:/var/www/html/
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=classicmodels
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./mysql/db:/var/lib/mysql
+      - ./mysql/backups/mysqlsampledatabase.sql:/docker-entrypoint-initdb.d/mysqlsampledatabase.sql
