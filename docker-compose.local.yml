@@ -1,8 +1,22 @@
 services:
+  proxy:
+    build:
+      context: proxy
+    container_name: proxy-local
+    restart: unless-stopped
+    environment:
+      - FRONTEND_HOST=app.loc
+      - BACKEND_HOST=api.app.loc
+    volumes:
+      - ./proxy/ui.conf:/etc/nginx/templates/default.conf.template
+      - ./proxy/api.conf:/etc/nginx/templates/api.conf.template
+    ports:
+      - 80:80
+
   frontend:
     build:
       context: frontend
-    container_name: frontend
+    container_name: frontend-local
     restart: unless-stopped
     ports:
       - 8080:8080
@@ -13,20 +27,20 @@ services:
   backend:
     build:
       context: backend
-    container_name: backend
+    container_name: backend-local
     restart: unless-stopped
     ports:
-      - '80:80'
+      - 8090:80
     volumes:
       - ./backend:/var/www/html/
 
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: mysql-local
     restart: unless-stopped
     environment:
       - MYSQL_DATABASE=classicmodels
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - ./mysql/db:/var/lib/mysql
-      - ./mysql/backups/mysqlsampledatabase.sql:/docker-entrypoint-initdb.d/mysqlsampledatabase.sql
+      - ./mysql/backups/classicmodels.sql:/docker-entrypoint-initdb.d/classicmodels.sql

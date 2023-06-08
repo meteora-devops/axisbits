@@ -1,0 +1,65 @@
+services:
+  proxy:
+    build:
+      context: proxy
+    depends_on:
+      - frontend
+      - backend
+    container_name: proxy-dev
+    restart: unless-stopped
+    environment:
+      - FRONTEND_HOST=${DNS_FRONTEND}
+      - BACKEND_HOST=${DNS_BACKEND}
+    volumes:
+      - ./proxy/ui.conf:/etc/nginx/templates/default.conf.template
+      - ./proxy/api.conf:/etc/nginx/templates/api.conf.template
+    ports:
+      - 80:80
+    networks:
+      - backend
+      - frontend
+
+  frontend:
+    build:
+      context: frontend
+    depends_on:
+      - backend
+    container_name: frontend-dev
+    restart: always
+    volumes:
+      - ./frontend:/app
+      - /project/node_modules
+    networks:
+      - frontend
+
+  backend:
+    build:
+      context: backend
+    depends_on:
+      - mysql
+    container_name: backend-dev
+    restart: always
+    volumes:
+      - ./backend:/var/www/html/
+    networks:
+      - backend
+      - frontend
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-dev
+    restart: always
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DB}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASS}
+    volumes:
+      - ./mysql/db:/var/lib/mysql
+      - ./mysql/backups/${MYSQL_DB}.sql:/docker-entrypoint-initdb.d/${MYSQL_DB}.sql
+    networks:
+      - mysql
+
+networks:
+  frontend:
+  backend:
+  mysql:

@@ -13,7 +13,6 @@ CMD ["yarn", "run", "serve"]
 
 FROM development as dev-envs
 RUN <<EOF
-apk update
 apk add git
 EOF
 
@@ -24,4 +23,3 @@ EOF
 # install Docker tools (cli, buildx, compose)
 COPY --from=gloursdocker/docker / /
 CMD ["yarn", "run", "serve"]
-
